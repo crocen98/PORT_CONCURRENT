@@ -1,20 +1,27 @@
 package com.epam.portsimulation.service.port;
 
 
+import com.epam.portsimulation.entity.Dock;
 import com.epam.portsimulation.entity.Purpose;
 import com.epam.portsimulation.entity.Ship;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayDeque;
+import java.util.Queue;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Port {
+    private static final Logger LOGGER = LogManager.getLogger(Port.class);
 
     private static volatile Port instance;
     private static final int COUNT_DOCKS = 3;
-    private  AtomicInteger containersCount = new AtomicInteger(0);
-    private final int maxCapacity = 1_000_00000;
-   // private Queue<Dock> docks = new ArrayDeque<>();
-    private Semaphore semaphore = new Semaphore(COUNT_DOCKS, true);
+    private ReentrantLock lock = new ReentrantLock();
+    private ReentrantLock lock2 = new ReentrantLock();
+
+    private Queue<Dock> docks;
+    private Semaphore semaphore = new Semaphore(COUNT_DOCKS);
 
     public static Port getInstance() {
         Port localInstance = instance;
@@ -29,8 +36,43 @@ public class Port {
         return localInstance;
     }
 
-    private Port() {
+    public int getCountEnabledDocs(){
+        return docks.size();
     }
+    public Dock pollDock() {
+        try {
+            lock.lock();
+            semaphore.acquire();
+            return docks.poll();
+        } catch (InterruptedException e) {
+            throw new RuntimeException("NOT SUPPORT");
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public void returnDock(Dock dock) {
+        try {
+            LOGGER.info("start returnDock()");
+            lock2.lock();
+            LOGGER.info("before lock returnDock()");
+
+            docks.add(dock);
+            LOGGER.info("returnDock()");
+        } finally {
+            semaphore.release();
+            lock2.unlock();
+        }
+    }
+
+
+    private Port() {
+        docks = new ArrayDeque<>(COUNT_DOCKS);
+        for (int i = 0 ; i < COUNT_DOCKS; ++i){
+            docks.add(new Dock(0 , 11000,i));
+        }
+    }
+
 
     public void startWork() {
     }
@@ -39,17 +81,7 @@ public class Port {
         return COUNT_DOCKS;
     }
 
-    public AtomicInteger getContainersCount() {
-        return containersCount;
-    }
 
-    public void setContainersCount(AtomicInteger containersCount) {
-        this.containersCount = containersCount;
-    }
-
-    public int getMaxCapacity() {
-        return maxCapacity;
-    }
 
     public Semaphore getSemaphore() {
         return semaphore;
@@ -60,22 +92,23 @@ public class Port {
     }
 
 
-    public static void main(String ... args) throws InterruptedException {
-        Port port = Port.getInstance();
-        Ship ship1 = new Ship(1_000_100, 1_000_000 , "Victoria", Purpose.UNLOADING);
-        Ship ship2 = new Ship(0, 10000 , "Titanick", Purpose.LOADING);
-        Ship ship3 = new Ship(0, 1_000_00 , "Varag", Purpose.LOADING);
-        Ship ship4 = new Ship(1_000_100, 1_000_000 , "Black", Purpose.UNLOADING);
-        Ship ship5 = new Ship(0, 1_000_00 , "White sale", Purpose.LOADING);
-        Ship ship6 = new Ship(1_000_100, 1_000_000 , "1111111", Purpose.UNLOADING);
-        Ship ship7 = new Ship(1_000_100, 1_000_100 , "2222222", Purpose.UNLOADING);
+    public static void main(String... args) throws InterruptedException {
+        Port.getInstance();
+        Ship ship1 = new Ship(10000, 10000, "Ship1", Purpose.UNLOADING);
+        Ship ship3 = new Ship(0, 10000, "Ship3", Purpose.LOADING);
 
-        Ship ship8 = new Ship(0, 1_000_00 , "3333333", Purpose.LOADING);
+        Ship ship6 = new Ship(10000, 10000, "Ship6", Purpose.UNLOADING);
+        Ship ship2 = new Ship(0, 10000, "Ship2", Purpose.LOADING);
 
-        Ship ship9 = new Ship(1_000_100, 1_000_100 , "4444444", Purpose.UNLOADING);
+        Ship ship9 = new Ship(10000, 10000, "Ship9", Purpose.UNLOADING);
+        Ship ship10 = new Ship(0, 10000, "Ship10", Purpose.LOADING);
 
-        Ship ship10 = new Ship(0, 10000 , "234567654345676543345676543234", Purpose.LOADING);
-        Ship ship11 = new Ship(0, 10000 , "6666", Purpose.LOADING);
+
+        Ship ship4 = new Ship(11000, 11000, "Ship4", Purpose.UNLOADING);
+        Ship ship5 = new Ship(0, 11000, "Ship5", Purpose.LOADING);
+
+        Ship ship7 = new Ship(10010, 10010, "Ship7", Purpose.UNLOADING);
+        Ship ship8 = new Ship(0, 10010, "Ship8", Purpose.LOADING);
 
         new Thread(ship1).start();
         new Thread(ship2).start();
@@ -87,15 +120,9 @@ public class Port {
         new Thread(ship8).start();
         new Thread(ship9).start();
         new Thread(ship10).start();
-        new Thread(ship11).start();
-
 
 
         //port.setContainersCount(new AtomicInteger(100_000_000));
-
-
-
-
 
 
     }

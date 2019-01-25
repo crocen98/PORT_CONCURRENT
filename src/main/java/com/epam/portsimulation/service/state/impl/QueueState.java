@@ -15,28 +15,28 @@ public class QueueState  extends ShipState {
 
     @Override
     public void doActionInPort() throws InterruptedException {
-        Lock lock = ship.getLock();
-        Purpose purpose = ship.getPurpose();
-        Port port = ship.getPort();
-        Condition lockCondition = lock.newCondition();
-        lock.lock();
-        try {
-            if (purpose == Purpose.LOADING) {
-                while (port.getContainersCount().intValue() < ship.getMaxCapacity()){
-                    lockCondition.await();
-                }
-            } else if(purpose == Purpose.UNLOADING){
-                while (port.getMaxCapacity() > ship.getContainersCount() + port.getContainersCount().intValue()){
-                    lockCondition.await();
-                }
-            }
-        }finally {
-            lock.unlock();
-        }
-
-
-
-
-
+//        Lock lock = ship.getLock();
+//        Purpose purpose = ship.getPurpose();
+//        Port port = ship.getPort();
+//        Condition lockCondition = lock.newCondition();
+//        lock.lock();
+//        try {
+//            if (purpose == Purpose.LOADING) {
+//                while (port.getContainersCount().intValue() < ship.getMaxCapacity()){
+//                    lockCondition.await();
+//                }
+//            } else if(purpose == Purpose.UNLOADING){
+//                while (port.getMaxCapacity() > ship.getContainersCount() + port.getContainersCount().intValue()){
+//                    lockCondition.await();
+//                }
+//            }
+//        }finally {
+//            lock.unlock();
+//        }
+//
+//
+//
+//
+//
     }
 }

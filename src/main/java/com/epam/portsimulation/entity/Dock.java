@@ -3,19 +3,38 @@ package com.epam.portsimulation.entity;
 public class Dock {
     private int numberOfContainers;
     private final int maxCapacity;
+    private final int id;
 
-    public Dock(int startContainersNumber , int maxCapacity){
-        numberOfContainers = maxCapacity;
+    @Override
+    public String toString() {
+        return "Dock{" +
+                "numberOfContainers=" + numberOfContainers +
+                ", maxCapacity=" + maxCapacity +
+                ", id=" + id +
+                '}';
+    }
+
+    public Dock(int startContainersNumber, int maxCapacity,int id) {
+        numberOfContainers = startContainersNumber;
         this.maxCapacity = maxCapacity;
+        this.id = id;
     }
 
 
-    public int getNumberOfContainers() {
-        return numberOfContainers;
+    public boolean addContainers(int containersCount) {
+        if (numberOfContainers + containersCount > maxCapacity) {
+            return false;
+        }
+        numberOfContainers += containersCount;
+        return true;
     }
 
-    public void setNumberOfContainers(int numberOfContainers) {
-        this.numberOfContainers = numberOfContainers;
+    public boolean removeContainers(int containersCount) {
+        if (numberOfContainers - containersCount < 0) {
+            return false;
+        }
+        numberOfContainers -= containersCount;
+        return true;
     }
 
     public int getMaxCapacity() {

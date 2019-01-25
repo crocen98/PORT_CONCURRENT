@@ -6,9 +6,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class Ship implements Runnable, Serializable {
     private static final Logger LOGGER = LogManager.getLogger(Ship.class);
@@ -17,10 +14,7 @@ public class Ship implements Runnable, Serializable {
     private Purpose purpose;
     private int containersCount;
     private final int maxCapacity;
-
-    private ReentrantLock lock = new ReentrantLock();
-    private Condition conditionLoading = lock.newCondition();
-    private Condition conditionUploading = lock.newCondition();
+    private Port port = Port.getInstance();
 
 
     public Ship(int containersCount, int maxCapacity, String name, Purpose purpose) {
@@ -30,73 +24,55 @@ public class Ship implements Runnable, Serializable {
         this.purpose = purpose;
     }
 
-    private Port port = Port.getInstance();
-
-
 
     @Override
     public void run() {
-        try {
-            lock.lock();
-            while (port.getContainersCount().intValue() < this.maxCapacity && purpose == Purpose.LOADING){
-                LOGGER.info("await Loading " + name);
-                conditionLoading.await();
-                LOGGER.info("Ship: " + name + " await + 111111111111111111111111111111111111111111111111111111111111111111111111111");
+        LOGGER.info("Start run for ship: " + name);
+        boolean isSuccessful = false;
+        int numberEnterToDock = 0;
+        while (!isSuccessful) {
+            LOGGER.info(this);
+            Dock dock = port.pollDock();
+            LOGGER.info("Get dock: " + dock);
+            numberEnterToDock++;
+            switch (purpose) {
+                case LOADING:
+                    LOGGER.info("LOADING");
+                    int countToLoad = maxCapacity - containersCount;
+                    isSuccessful = dock.removeContainers(countToLoad);
+                    if (isSuccessful) {
+                        containersCount = maxCapacity;
+                    }
+                    break;
+                case UNLOADING:
+                    LOGGER.info("UNLOADING");
+                    isSuccessful = dock.addContainers(containersCount);
+                    if (isSuccessful) {
+                        containersCount = 0;
+                    }
+                    break;
+                case LOADING_UNLOADING:
+                    LOGGER.info("LOADING_UNLOADING");
+                    isSuccessful = dock.addContainers(containersCount);
+                    if (isSuccessful) {
+                        isSuccessful = dock.removeContainers(maxCapacity);
+                        containersCount = maxCapacity;
+                    }
+                default:
+                    throw new IllegalArgumentException("NOT SUPPORTEDE STATE!!!");
             }
-
-            while (((port.getMaxCapacity() - port.getContainersCount().intValue()) <= this.getContainersCount()) && (purpose == Purpose.UNLOADING)){
-                LOGGER.info("await UNLoading " + name);
-
-                conditionUploading.await();
-                LOGGER.info("Ship: " + name + " await + 111111111111111111111111111111111111111111111111111111111111111111111111111");
-
-            }
-            LOGGER.info(port.getContainersCount());
-
-            //Semaphore semaphore = port.getSemaphore();
-//            try {
-//                semaphore.acquire();
-              //  LOGGER.info("Ship: " + name + " in dock + " + semaphore.availablePermits());
-                if (this.purpose == Purpose.LOADING) {
-                    LOGGER.info(port.getContainersCount() + " Containers count!!!! LOADING");
-                    port.getContainersCount().set(port.getContainersCount().intValue() - this.maxCapacity);
-                    conditionUploading.signalAll();
-                } else if(this.purpose == Purpose.UNLOADING) {
-                    LOGGER.info(port.getContainersCount() + " Containers count!!!! UNLOADING");
-                    port.getContainersCount().addAndGet(this.containersCount);
-                    conditionLoading.signalAll();
-                }
-
-            LOGGER.info("END " + name);
-              //  Thread.sleep(2000);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            } finally {
-//                semaphore.release();
+            LOGGER.info(port.getCountEnabledDocs() + "before getCountEnabledDocs()");
+            port.returnDock(dock);
+            LOGGER.info(port.getCountEnabledDocs() + "after getCountEnabledDocs()");
+//            if (numberEnterToDock >= 100) {
+//                try {
+//                    throw new SimulationErrorException("This port cannot serve ship " + name + " at the present time, the prowling will go to another port.");
+//                } catch (SimulationErrorException e) {
+//                    LOGGER.error(e);
+//                    return;
+//                }
 //            }
-
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } finally {
-            lock.unlock();
         }
-
-//        Semaphore semaphore = port.getSemaphore();
-//        try {
-//            semaphore.acquire();
-//            LOGGER.info("Ship: " + name + " in dock + " + semaphore.availablePermits() );
-//            if(this.purpose == Purpose.LOADING){
-//                port.getContainersCount().set(port.getContainersCount().intValue() - this.maxCapacity);
-//            } else {
-//                port.getContainersCount().addAndGet(this.containersCount);
-//            }
-//            lockCondition.signalAll();
-//            Thread.sleep(2000);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        } finally {
-//            semaphore.release();
-//        }
     }
 
 
@@ -136,13 +112,6 @@ public class Ship implements Runnable, Serializable {
         this.name = name;
     }
 
-    public ReentrantLock getLock() {
-        return lock;
-    }
-
-    public void setLock(ReentrantLock lock) {
-        this.lock = lock;
-    }
 
     public Port getPort() {
         return port;
