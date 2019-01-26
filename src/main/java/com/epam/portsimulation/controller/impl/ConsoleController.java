@@ -4,15 +4,26 @@ import com.epam.portsimulation.controller.Controller;
 import com.epam.portsimulation.entity.Ship;
 import com.epam.portsimulation.service.builder.JSONShipsBuilder;
 import com.epam.portsimulation.service.builder.ShipsBuilder;
-import com.epam.portsimulation.service.port.Port;
+import com.epam.portsimulation.service.exception.NotValidShipException;
+import com.epam.portsimulation.service.exception.ServiceFailNotFoundException;
+import com.epam.portsimulation.service.thradssarter.ThradsStarter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 
 public class ConsoleController implements Controller {
+    private static final Logger LOGGER = LogManager.getLogger(ConsoleController.class);
+
     public void startPortSimulation(String pathToFile) {
         ShipsBuilder builder = new JSONShipsBuilder();
-        List<Ship> ships= builder.parse(pathToFile);
-        Port port = Port.getInstance();
-        port.startWork();
+        try {
+            List<Ship> ships= builder.parse(pathToFile);
+            ThradsStarter starter = new ThradsStarter();
+            starter.startAllThrads(ships);
+        } catch (NotValidShipException | ServiceFailNotFoundException e) {
+            LOGGER.error(e);
+        }
+
     }
 }
