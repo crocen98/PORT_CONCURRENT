@@ -1,17 +1,9 @@
 package com.epam.portsimulation.entity;
 
-import com.epam.portsimulation.service.port.Port;
 import org.junit.Assert;
 import org.junit.Test;
 public class ShipTest {
 
-    @Test
-    public void shouldGetEmptyShipAndReturnShipWithFullCountOfContainers() throws InterruptedException {
-        Port.getInstance();
-        Ship ship = new Ship(0, 10000, "Name1", Purpose.LOADING);
-        new Thread(ship).start();
-
-    }
 
     @Test
     public void shouldGetShipsAndChangeStateOfAllShips() throws InterruptedException {

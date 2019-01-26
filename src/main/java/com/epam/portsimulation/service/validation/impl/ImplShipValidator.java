@@ -1,10 +1,10 @@
-package com.epam.portsimulation.service.validation;
+package com.epam.portsimulation.service.validation.impl;
 
 import com.epam.portsimulation.entity.Ship;
 import com.epam.portsimulation.service.exception.NotValidShipException;
+import com.epam.portsimulation.service.validation.ShipValidator;
 
 import java.util.Collection;
-import java.util.List;
 
 public class ImplShipValidator implements ShipValidator {
     @Override
@@ -14,7 +14,7 @@ public class ImplShipValidator implements ShipValidator {
                     || ship.getContainersCount() < 0) {
                 throw new NotValidShipException("Ships capacity and containers count should be greater than 0!");
             }
-            if (ship.getContainersCount() < ship.getContainersCount()) {
+            if (ship.getContainersCount() > ship.getMaxCapacity()) {
                 throw new NotValidShipException("Ships capacity should be greater than containers count!");
 
             }

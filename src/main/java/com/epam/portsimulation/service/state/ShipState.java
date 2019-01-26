@@ -1,5 +1,6 @@
 package com.epam.portsimulation.service.state;
 
+import com.epam.portsimulation.entity.Dock;
 import com.epam.portsimulation.entity.Ship;
 
 public abstract class ShipState {
@@ -9,5 +10,5 @@ public abstract class ShipState {
         this.ship = ship;
     }
 
-    public abstract void doActionInPort() throws InterruptedException;
+    public abstract boolean doActionInPort(Dock dock);
 }

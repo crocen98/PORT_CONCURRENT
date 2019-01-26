@@ -6,7 +6,7 @@ import com.epam.portsimulation.service.builder.JSONShipsBuilder;
 import com.epam.portsimulation.service.builder.ShipsBuilder;
 import com.epam.portsimulation.service.exception.NotValidShipException;
 import com.epam.portsimulation.service.exception.ServiceFailNotFoundException;
-import com.epam.portsimulation.service.thradssarter.ThradsStarter;
+import com.epam.portsimulation.service.threadssarter.ThreadsStarter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -19,8 +19,8 @@ public class ConsoleController implements Controller {
         ShipsBuilder builder = new JSONShipsBuilder();
         try {
             List<Ship> ships= builder.parse(pathToFile);
-            ThradsStarter starter = new ThradsStarter();
-            starter.startAllThrads(ships);
+            ThreadsStarter starter = new ThreadsStarter();
+            starter.startAllThreads(ships);
         } catch (NotValidShipException | ServiceFailNotFoundException e) {
             LOGGER.error(e);
         }

@@ -3,6 +3,7 @@ package com.epam.portsimulation.entity;
 import com.epam.portsimulation.service.exception.SimulationErrorException;
 import com.epam.portsimulation.service.port.Port;
 import com.epam.portsimulation.service.state.ShipState;
+import com.epam.portsimulation.service.state.StateFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -11,12 +12,12 @@ import java.util.Objects;
 
 public class Ship implements Runnable, Serializable {
     private static final Logger LOGGER = LogManager.getLogger(Ship.class);
+    private static final int MAXIMUM_ATTEMPTS_NUMBER = 30;
     private String name;
-    private ShipState state;
     private Purpose purpose;
     private int containersCount;
     private final int maxCapacity;
-    private Port port;
+    private transient Port port;
 
 
     public Ship(int containersCount, int maxCapacity, String name, Purpose purpose) {
@@ -31,38 +32,16 @@ public class Ship implements Runnable, Serializable {
     public void run() {
         port = Port.getInstance();
         LOGGER.info("Start run for ship: " + name);
+        ShipState state = StateFactory.getInstance().getState(this);
         boolean isSuccessful = false;
         int numberEnterToDock = 0;
         while (!isSuccessful) {
             LOGGER.info(this + " try to find suitable dock. " + numberEnterToDock + " iteration of loop");
             Dock dock = port.pollDock();
             numberEnterToDock++;
-            switch (purpose) {
-                case LOADING:
-                    int countToLoad = maxCapacity - containersCount;
-                    isSuccessful = dock.removeContainers(countToLoad);
-                    if (isSuccessful) {
-                        containersCount = maxCapacity;
-                    }
-                    break;
-                case UNLOADING:
-                    isSuccessful = dock.addContainers(containersCount);
-                    if (isSuccessful) {
-                        containersCount = 0;
-                    }
-                    break;
-                case LOADING_UNLOADING:
-                    isSuccessful = dock.addContainers(containersCount);
-                    if (isSuccessful) {
-                        isSuccessful = dock.removeContainers(maxCapacity);
-                        containersCount = maxCapacity;
-                    }
-                    break;
-                default:
-                    throw new IllegalArgumentException("NOT SUPPORTED STATE!!!");
-            }
+            isSuccessful = state.doActionInPort(dock);
             port.returnDock(dock);
-            if (numberEnterToDock >= 30) {
+            if (numberEnterToDock >= MAXIMUM_ATTEMPTS_NUMBER) {
                 try {
                     throw new SimulationErrorException("This port cannot serve ship " + name + " at the present time, the prowling will go to another port.");
                 } catch (SimulationErrorException e) {
@@ -72,16 +51,7 @@ public class Ship implements Runnable, Serializable {
             }
         }
 
-        LOGGER.info(this+ "End run()");
-    }
-
-
-    public ShipState getState() {
-        return state;
-    }
-
-    public void setState(ShipState state) {
-        this.state = state;
+        LOGGER.info(this + "End run()");
     }
 
     public Purpose getPurpose() {
@@ -125,7 +95,6 @@ public class Ship implements Runnable, Serializable {
     public String toString() {
         return "Ship{" +
                 "name='" + name + '\'' +
-                ", state=" + state +
                 ", purpose=" + purpose +
                 ", containersCount=" + containersCount +
                 ", maxCapacity=" + maxCapacity +
@@ -141,12 +110,11 @@ public class Ship implements Runnable, Serializable {
         return containersCount == ship.containersCount &&
                 maxCapacity == ship.maxCapacity &&
                 Objects.equals(name, ship.name) &&
-                Objects.equals(state, ship.state) &&
-                Objects.equals(purpose,ship.purpose);
+                Objects.equals(purpose, ship.purpose);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, state, purpose, containersCount, maxCapacity);
+        return Objects.hash(name, purpose, containersCount, maxCapacity);
     }
 }

@@ -1,0 +1,32 @@
+2019-01-26 06:53:42.893 [Thread-2] INFO  com.epam.portsimulation.entity.Ship - Start run for ship: Name2
+2019-01-26 06:53:42.893 [Thread-3] INFO  com.epam.portsimulation.entity.Ship - Start run for ship: Name3
+2019-01-26 06:53:42.893 [Thread-1] INFO  com.epam.portsimulation.entity.Ship - Start run for ship: Name1
+2019-01-26 06:53:42.893 [Thread-4] INFO  com.epam.portsimulation.entity.Ship - Start run for ship: Name4
+2019-01-26 06:53:42.898 [Thread-3] INFO  com.epam.portsimulation.entity.Ship - Ship{name='Name3', purpose=UNLOADING, containersCount=10000, maxCapacity=10000, port=com.epam.portsimulation.service.port.Port@50177} try to find suitable dock. 0 iteration of loop
+2019-01-26 06:53:42.898 [Thread-2] INFO  com.epam.portsimulation.entity.Ship - Ship{name='Name2', purpose=LOADING, containersCount=0, maxCapacity=10000, port=com.epam.portsimulation.service.port.Port@50177} try to find suitable dock. 0 iteration of loop
+2019-01-26 06:53:42.898 [Thread-1] INFO  com.epam.portsimulation.entity.Ship - Ship{name='Name1', purpose=LOADING, containersCount=0, maxCapacity=10000, port=com.epam.portsimulation.service.port.Port@50177} try to find suitable dock. 0 iteration of loop
+2019-01-26 06:53:42.898 [Thread-4] INFO  com.epam.portsimulation.entity.Ship - Ship{name='Name4', purpose=UNLOADING, containersCount=10000, maxCapacity=10000, port=com.epam.portsimulation.service.port.Port@50177} try to find suitable dock. 0 iteration of loop
+2019-01-26 06:53:42.898 [Thread-3] INFO  com.epam.portsimulation.service.port.Port - semaphore.acquire(); in method pollDock()
+2019-01-26 06:53:42.899 [Thread-2] INFO  com.epam.portsimulation.service.port.Port - semaphore.acquire(); in method pollDock()
+2019-01-26 06:53:42.899 [Thread-3] INFO  com.epam.portsimulation.service.port.Port - start returnDock()
+2019-01-26 06:53:42.899 [Thread-2] INFO  com.epam.portsimulation.service.port.Port - start returnDock()
+2019-01-26 06:53:42.899 [Thread-1] INFO  com.epam.portsimulation.service.port.Port - semaphore.acquire(); in method pollDock()
+2019-01-26 06:53:42.899 [Thread-3] INFO  com.epam.portsimulation.service.port.Port - before lock returnDock()
+2019-01-26 06:53:42.899 [Thread-1] INFO  com.epam.portsimulation.service.port.Port - start returnDock()
+2019-01-26 06:53:42.900 [Thread-3] INFO  com.epam.portsimulation.service.port.Port - returnDock()
+2019-01-26 06:53:42.900 [Thread-3] INFO  com.epam.portsimulation.service.port.Port - semaphore.release(); in method returnDock()
+2019-01-26 06:53:42.900 [Thread-4] INFO  com.epam.portsimulation.service.port.Port - semaphore.acquire(); in method pollDock()
+2019-01-26 06:53:42.900 [Thread-2] INFO  com.epam.portsimulation.service.port.Port - before lock returnDock()
+2019-01-26 06:53:42.900 [Thread-4] INFO  com.epam.portsimulation.service.port.Port - start returnDock()
+2019-01-26 06:53:42.900 [Thread-3] INFO  com.epam.portsimulation.entity.Ship - Ship{name='Name3', purpose=UNLOADING, containersCount=0, maxCapacity=10000, port=com.epam.portsimulation.service.port.Port@50177}End run()
+2019-01-26 06:53:42.900 [Thread-2] INFO  com.epam.portsimulation.service.port.Port - returnDock()
+2019-01-26 06:53:42.901 [Thread-2] INFO  com.epam.portsimulation.service.port.Port - semaphore.release(); in method returnDock()
+2019-01-26 06:53:42.901 [Thread-1] INFO  com.epam.portsimulation.service.port.Port - before lock returnDock()
+2019-01-26 06:53:42.901 [Thread-2] INFO  com.epam.portsimulation.entity.Ship - Ship{name='Name2', purpose=LOADING, containersCount=10000, maxCapacity=10000, port=com.epam.portsimulation.service.port.Port@50177}End run()
+2019-01-26 06:53:42.901 [Thread-1] INFO  com.epam.portsimulation.service.port.Port - returnDock()
+2019-01-26 06:53:42.902 [Thread-1] INFO  com.epam.portsimulation.service.port.Port - semaphore.release(); in method returnDock()
+2019-01-26 06:53:42.902 [Thread-1] INFO  com.epam.portsimulation.entity.Ship - Ship{name='Name1', purpose=LOADING, containersCount=10000, maxCapacity=10000, port=com.epam.portsimulation.service.port.Port@50177}End run()
+2019-01-26 06:53:42.902 [Thread-4] INFO  com.epam.portsimulation.service.port.Port - before lock returnDock()
+2019-01-26 06:53:42.902 [Thread-4] INFO  com.epam.portsimulation.service.port.Port - returnDock()
+2019-01-26 06:53:42.902 [Thread-4] INFO  com.epam.portsimulation.service.port.Port - semaphore.release(); in method returnDock()
+2019-01-26 06:53:42.902 [Thread-4] INFO  com.epam.portsimulation.entity.Ship - Ship{name='Name4', purpose=UNLOADING, containersCount=0, maxCapacity=10000, port=com.epam.portsimulation.service.port.Port@50177}End run()

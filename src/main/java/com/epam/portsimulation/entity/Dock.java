@@ -20,7 +20,6 @@ public class Dock {
         this.id = id;
     }
 
-
     public boolean addContainers(int containersCount) {
         if (numberOfContainers + containersCount > maxCapacity) {
             return false;
@@ -35,9 +34,5 @@ public class Dock {
         }
         numberOfContainers -= containersCount;
         return true;
-    }
-
-    public int getMaxCapacity() {
-        return maxCapacity;
     }
 }

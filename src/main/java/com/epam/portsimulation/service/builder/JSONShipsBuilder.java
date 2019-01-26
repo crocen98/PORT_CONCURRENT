@@ -3,7 +3,7 @@ package com.epam.portsimulation.service.builder;
 import com.epam.portsimulation.entity.Ship;
 import com.epam.portsimulation.service.exception.NotValidShipException;
 import com.epam.portsimulation.service.exception.ServiceFailNotFoundException;
-import com.epam.portsimulation.service.validation.ImplShipValidator;
+import com.epam.portsimulation.service.validation.impl.ImplShipValidator;
 import com.epam.portsimulation.service.validation.ShipValidator;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -29,8 +29,4 @@ public class JSONShipsBuilder implements ShipsBuilder {
         }
     }
 
-    public static void main(String... args) throws NotValidShipException, ServiceFailNotFoundException {
-        JSONShipsBuilder builder = new JSONShipsBuilder();
-        System.out.println(builder.parse("resources/json/ships.json"));
-    }
 }
