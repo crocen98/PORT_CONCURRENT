@@ -9,8 +9,9 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.concurrent.Callable;
 
-public class Ship implements Runnable, Serializable {
+public class Ship implements Callable<String>, Serializable {
     private static final Logger LOGGER = LogManager.getLogger(Ship.class);
     private static final int MAXIMUM_ATTEMPTS_NUMBER = 30;
     private String name;
@@ -29,38 +30,35 @@ public class Ship implements Runnable, Serializable {
 
 
     @Override
-    public void run() {
+    public String call() {
         port = Port.getInstance();
         LOGGER.info("Start run for ship: " + name);
         ShipState state = StateFactory.getInstance().getState(this);
         boolean isSuccessful = false;
         int numberEnterToDock = 0;
         while (!isSuccessful) {
-            LOGGER.info(this + " try to find suitable dock. " + numberEnterToDock + " iteration of loop");
+            LOGGER.info(this.name + " try to find suitable dock. " + numberEnterToDock + "rd attempt to enter the dock");
             Dock dock = port.pollDock();
+            LOGGER.info("Count enabled docks: " + port.getCountEnabledDocs());
             numberEnterToDock++;
             isSuccessful = state.doActionInPort(dock);
             port.returnDock(dock);
             if (numberEnterToDock >= MAXIMUM_ATTEMPTS_NUMBER) {
                 try {
                     throw new SimulationErrorException("This port cannot serve ship " + name + " at the present time, the prowling will go to another port.");
-                } catch (SimulationErrorException e) {
+                } catch (SimulationErrorException e){
                     LOGGER.error(e);
-                    return;
                 }
             }
         }
-
         LOGGER.info(this + "End run()");
+        return "Ship: " + this.name + " finish " + this.purpose + " successful!";
     }
 
     public Purpose getPurpose() {
         return purpose;
     }
 
-    public void setPurpose(Purpose purpose) {
-        this.purpose = purpose;
-    }
 
     public int getContainersCount() {
         return containersCount;

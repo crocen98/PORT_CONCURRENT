@@ -11,32 +11,37 @@ import java.util.ArrayDeque;
 
 import java.util.Queue;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Port {
     private static final Logger LOGGER = LogManager.getLogger(Port.class);
+
     private static final int START_CONTAINERS_NUMBER_IN_DOCK = 20_000;
     private static final int START_MAX_CAPACITY_IN_DOCK = 100_000;
     private static final int COUNT_DOCKS = 3;
 
-    private static volatile Port instance;
-    private ReentrantLock lockForPollDock = new ReentrantLock();
-    private ReentrantLock lockForReturnDock = new ReentrantLock();
+    private static Port instance;
+    private Lock lock = new ReentrantLock();
 
     private final Queue<Dock> docks;
     private final Semaphore semaphore = new Semaphore(COUNT_DOCKS);
-
+    private static  AtomicBoolean isCreated = new AtomicBoolean(false);
+    private static final Lock singletonLock = new ReentrantLock();
     public static Port getInstance() {
-        Port localInstance = instance;
-        if (localInstance == null) {
-            synchronized (Port.class) {
-                localInstance = instance;
-                if (localInstance == null) {
-                    instance = localInstance = new Port();
-                }
+        try {
+            singletonLock.lock();
+            if (isCreated.get()) {
+                return instance;
+            } else {
+                instance = new Port();
+                isCreated.set(true);
+                return instance;
             }
+        } finally {
+            singletonLock.unlock();
         }
-        return localInstance;
     }
 
     public int getCountEnabledDocs() {
@@ -45,15 +50,17 @@ public class Port {
 
     public Dock pollDock() {
         try {
-            lockForPollDock.lock();
+            LOGGER.info("start pollDock()");
             semaphore.acquire();
-            LOGGER.info("semaphore.acquire(); in method pollDock()");
+            lock.lock();
+            LOGGER.info("Lock in pollDock() and semaphore.acquire()");
             return docks.poll();
         } catch (InterruptedException e) {
             LOGGER.error(e);
             Thread.currentThread().interrupt();
         } finally {
-            lockForPollDock.unlock();
+            lock.unlock();
+            LOGGER.info("UnLock in pollDock() and semaphore.acquire()");
         }
         return null;
     }
@@ -61,15 +68,17 @@ public class Port {
     public void returnDock(Dock dock) {
         try {
             LOGGER.info("start returnDock()");
-            lockForReturnDock.lock();
-            LOGGER.info("before lock returnDock()");
+            lock.lock();
+            LOGGER.info("Lock returnDock()");
 
             docks.add(dock);
             LOGGER.info("returnDock()");
         } finally {
             semaphore.release();
-            LOGGER.info("semaphore.release(); in method returnDock()");
-            lockForReturnDock.unlock();
+            LOGGER.info("semaphore.release()");
+            lock.unlock();
+            LOGGER.info("UnLock returnDock()");
+
         }
     }
 
@@ -80,9 +89,4 @@ public class Port {
             docks.add(new Dock(START_CONTAINERS_NUMBER_IN_DOCK, START_MAX_CAPACITY_IN_DOCK, i));
         }
     }
-
-    public static int getCountDocks() {
-        return COUNT_DOCKS;
-    }
-
 }
